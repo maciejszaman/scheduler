@@ -1,35 +1,13 @@
-import {
-  Box,
-  Button,
-  Collapse,
-  Divider,
-  TextField,
-  Typography,
-} from "@mui/material";
-import React, { useContext, useEffect, useState } from "react";
-import { FirebaseContext } from "../../providers/FireBaseProvider";
-import {
-  createUserWithEmailAndPassword,
-  fetchSignInMethodsForEmail,
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-} from "firebase/auth";
+import { Box, Button, Divider, TextField, Typography } from "@mui/material";
+
 import * as Types from "./Login.types";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import GoogleIcon from "@mui/icons-material/Google";
-import { useForm } from "react-hook-form";
 import { useLoginHook } from "./Login.hooks";
 
 export const Login = (props: Types.LoginProps) => {
-  const {
-    onSubmit,
-    handleGoogleSignIn,
-    setDisplayPasswordInput,
-    register,
-    errors,
-    displayPasswordInput,
-  } = useLoginHook(props);
+  const { onSubmit, handleGoogleSignIn, register, errors } =
+    useLoginHook(props);
 
   return (
     <>
@@ -46,23 +24,25 @@ export const Login = (props: Types.LoginProps) => {
               maxWidth={250}
               justifyContent="space-evenly"
             >
-              <Typography variant="h6">Rejestracja</Typography>
+              <Typography variant="h6">Zaloguj się</Typography>
               <TextField
-                placeholder="E-mail"
+                aria-label="Pole adresu e-mail"
+                placeholder="Adres e-mail"
                 type="email"
                 {...register("email")}
                 error={!!errors.email}
                 helperText={errors.email?.message}
               />
               <TextField
-                placeholder="Password"
+                aria-label="Pole hasła"
+                placeholder="Hasło"
                 type="password"
                 {...register("password")}
                 error={!!errors.password}
                 helperText={errors.password?.message}
               />
-              <Button type="submit" variant="contained">
-                Sign up or log in
+              <Button aria-label="Logowanie" type="submit" variant="contained">
+                Zaloguj się
               </Button>
               <Button
                 startIcon={<GoogleIcon />}

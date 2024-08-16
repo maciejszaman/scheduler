@@ -8,9 +8,6 @@ import {
   IconButton,
   List,
   ListItem,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
 } from "@mui/material";
 
 import DarkModeIcon from "@mui/icons-material/DarkMode";
@@ -24,7 +21,6 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { EventMenu } from "../EventMenu/EventMenu";
 
 export const Navigation = ({
-  setLanguage,
   setDarkMode,
   setViewMode,
   viewMode,
@@ -36,10 +32,6 @@ export const Navigation = ({
 
   const toggleDrawer = (newState: boolean) => {
     setDrawerOpen(newState);
-  };
-
-  const handleChange = (event: SelectChangeEvent) => {
-    setLanguage(event.target.value);
   };
 
   const handleDarkModeChange = () => {
@@ -62,7 +54,7 @@ export const Navigation = ({
         <Box gap={2} className="hidden md:flex">
           <IconButton
             disabled={userData ? false : true}
-            aria-label="add an event"
+            aria-label="dodaj wydarzenie"
             onClick={handleAddButton}
           >
             <AddIcon />
@@ -70,6 +62,7 @@ export const Navigation = ({
         </Box>
         <Box className="hidden md:flex" gap={2}>
           <IconButton
+            aria-label="widok dzienny"
             disabled={userData ? false : true}
             color={viewMode === ViewModes.DailyView ? "primary" : "default"}
             onClick={() => handleViewChange(ViewModes.DailyView)}
@@ -77,6 +70,7 @@ export const Navigation = ({
             <TodayIcon />
           </IconButton>
           <IconButton
+            aria-label="widok tygodniowy"
             disabled={userData ? false : true}
             color={viewMode === ViewModes.WeeklyView ? "primary" : "default"}
             onClick={() => handleViewChange(ViewModes.WeeklyView)}
@@ -84,6 +78,7 @@ export const Navigation = ({
             <EventNoteIcon />
           </IconButton>
           <IconButton
+            aria-label="widok miesięczny"
             disabled={userData ? false : true}
             color={viewMode === ViewModes.MonthlyView ? "primary" : "default"}
             onClick={() => handleViewChange(ViewModes.MonthlyView)}
@@ -92,22 +87,19 @@ export const Navigation = ({
           </IconButton>
         </Box>
         <Box display="flex" gap={2}>
-          {userData && userData.displayName ? (
-            <Avatar
-              alt={userData.displayName}
-              src={userData.photoURL ? userData.photoURL : ""}
-            />
-          ) : null}
+          {userData && userData.photoURL ? (
+            <Avatar alt="Avatar użytkownika" src={userData.photoURL} />
+          ) : (
+            <Avatar alt="Avatar użytkownika">
+              {userData?.displayName?.slice(0, 1)}
+            </Avatar>
+          )}
           <IconButton aria-label="dark-mode" onClick={handleDarkModeChange}>
             {darkMode ? <DarkModeIcon /> : <LightModeIcon />}
           </IconButton>
-          <Select defaultValue="pl-PL" onChange={handleChange} size="small">
-            <MenuItem value="pl-PL">Polski</MenuItem>
-            <MenuItem value="en-US">English</MenuItem>
-          </Select>
         </Box>
         <Box className="md:hidden">
-          <IconButton onClick={() => toggleDrawer(true)}>
+          <IconButton disabled={!userData} onClick={() => toggleDrawer(true)}>
             <MenuIcon />
           </IconButton>
         </Box>
@@ -120,6 +112,7 @@ export const Navigation = ({
         <List>
           <ListItem>
             <IconButton
+              aria-label="widok dzienny"
               disabled={!userData}
               color={viewMode === ViewModes.DailyView ? "primary" : "default"}
               onClick={() => handleViewChange(ViewModes.DailyView)}
@@ -129,6 +122,7 @@ export const Navigation = ({
           </ListItem>
           <ListItem>
             <IconButton
+              aria-label="widok tygodniowy"
               disabled={!userData}
               color={viewMode === ViewModes.WeeklyView ? "primary" : "default"}
               onClick={() => handleViewChange(ViewModes.WeeklyView)}
@@ -138,6 +132,7 @@ export const Navigation = ({
           </ListItem>
           <ListItem>
             <IconButton
+              aria-label="widok miesięczny"
               disabled={!userData}
               color={viewMode === ViewModes.MonthlyView ? "primary" : "default"}
               onClick={() => handleViewChange(ViewModes.MonthlyView)}
@@ -149,7 +144,7 @@ export const Navigation = ({
           <ListItem>
             <IconButton
               disabled={!userData}
-              aria-label="add an event"
+              aria-label="Dodaj wydarzenie"
               onClick={handleAddButton}
             >
               <AddIcon />
@@ -157,12 +152,14 @@ export const Navigation = ({
           </ListItem>
         </List>
       </Drawer>
-      <EventMenu
-        eventId={undefined}
-        userData={userData}
-        open={open}
-        setOpen={setOpen}
-      />
+      {open && (
+        <EventMenu
+          eventId={undefined}
+          userData={userData}
+          open={open}
+          setOpen={setOpen}
+        />
+      )}
     </>
   );
 };

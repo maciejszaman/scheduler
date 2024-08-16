@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FirebaseContext } from "../../providers/FireBaseProvider";
 import {
@@ -13,11 +13,12 @@ import toast from "react-hot-toast";
 import * as Types from "./Login.types";
 import { z } from "zod";
 import { loginSchema } from "./Login.schema";
+import ParseErrorMessage from "../../shared/ParseErrorMessage";
 
 export const useLoginHook = ({ setUserData }: Types.LoginProps) => {
   const [displayPasswordInput, setDisplayPasswordInput] = useState(false);
 
-  const { auth, app } = useContext(FirebaseContext);
+  const { auth } = useContext(FirebaseContext);
 
   const {
     register,
@@ -37,8 +38,7 @@ export const useLoginHook = ({ setUserData }: Types.LoginProps) => {
         }
       );
     } catch (error: any) {
-      toast.error("huj");
-      console.log(error);
+      toast.error(ParseErrorMessage(error.code));
     }
   };
 
@@ -52,8 +52,7 @@ export const useLoginHook = ({ setUserData }: Types.LoginProps) => {
         }
       );
     } catch (error: any) {
-      toast.error("login huj");
-      console.log(error);
+      toast.error(ParseErrorMessage(error.code));
     }
   };
 
@@ -62,14 +61,14 @@ export const useLoginHook = ({ setUserData }: Types.LoginProps) => {
     if (methods.length === 0) {
       try {
         signup(values.email, values.password);
-      } catch (err) {
-        console.error(err);
+      } catch (error: any) {
+        toast.error(ParseErrorMessage(error.code));
       }
     } else {
       try {
         login(values.email, values.password);
-      } catch (err) {
-        console.error(err);
+      } catch (error: any) {
+        toast.error(ParseErrorMessage(error.code));
       }
     }
   });
@@ -82,8 +81,8 @@ export const useLoginHook = ({ setUserData }: Types.LoginProps) => {
         setUserData(user);
         console.log(user);
       });
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      toast.error(ParseErrorMessage(error.code));
     }
   };
 

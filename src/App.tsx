@@ -12,7 +12,6 @@ import { User, UserCredential } from "firebase/auth";
 import { Toaster } from "react-hot-toast";
 
 function App() {
-  const [language, setLanguage] = useState("pl-PL");
   const [darkMode, setDarkMode] = useState(false);
   const [viewMode, setViewMode] = useState(ViewModes.DailyView);
   const [userData, setUserData] = useState<User | null>(null);
@@ -25,12 +24,29 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Toaster />
+      <Toaster
+        toastOptions={
+          darkMode
+            ? {
+                className: "",
+                style: {
+                  background: "#333",
+                  color: "#fff",
+                },
+              }
+            : {
+                className: "",
+                style: {
+                  background: "#fff",
+                  color: "#000",
+                },
+              }
+        }
+      />
       <FirebaseProvider>
         <Paper className="h-screen">
           <Navigation
             setViewMode={setViewMode}
-            setLanguage={setLanguage}
             setDarkMode={setDarkMode}
             viewMode={viewMode}
             darkMode={darkMode}
@@ -39,11 +55,7 @@ function App() {
           {userData ? (
             <>
               <Divider />
-              <Calendar
-                userData={userData}
-                viewMode={viewMode}
-                language={language}
-              />
+              <Calendar userData={userData} viewMode={viewMode} />
             </>
           ) : (
             <Login setUserData={setUserData} />

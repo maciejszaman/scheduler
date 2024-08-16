@@ -5,24 +5,19 @@ import {
   Scheduler,
   WeekView,
 } from "@devexpress/dx-react-scheduler-material-ui";
-import { Box, Paper, Typography } from "@mui/material";
+import { Paper } from "@mui/material";
 import { ViewState } from "@devexpress/dx-react-scheduler";
 import * as Types from "./Calendar.types";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ViewModes } from "../../shared/enums/enum";
 import dayjs from "dayjs";
-import { collection, doc, getDocs, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { FirebaseContext } from "../../providers/FireBaseProvider";
 import * as SharedTypes from "../../shared/types/Shared.types";
 import { EventMenu } from "../EventMenu/EventMenu";
-import { unsubscribe } from "diagnostics_channel";
 
-export const Calendar = ({
-  language,
-  viewMode,
-  userData,
-}: Types.CalendarProps) => {
-  const { auth, app, db } = useContext(FirebaseContext);
+export const Calendar = ({ viewMode, userData }: Types.CalendarProps) => {
+  const { db } = useContext(FirebaseContext);
   const [schedulerData, setSchedulerData] = useState<SharedTypes.Event[]>([]);
   const [editMenuOpen, setEditMenuOpen] = useState(false);
   const [lastEventId, setLastEventId] = useState<string | undefined>(undefined);
@@ -58,7 +53,7 @@ export const Calendar = ({
   return (
     <>
       <Paper>
-        <Scheduler locale={language} data={schedulerData}>
+        <Scheduler locale="pl_PL" data={schedulerData}>
           <ViewState currentDate={dayjs().toDate()} />
           {viewMode === ViewModes.DailyView && (
             <DayView startDayHour={8} endDayHour={16} />
@@ -76,12 +71,14 @@ export const Calendar = ({
             )}
           />
         </Scheduler>
-        <EventMenu
-          eventId={lastEventId}
-          open={editMenuOpen}
-          setOpen={setEditMenuOpen}
-          userData={userData}
-        />
+        {editMenuOpen && (
+          <EventMenu
+            eventId={lastEventId}
+            open={editMenuOpen}
+            setOpen={setEditMenuOpen}
+            userData={userData}
+          />
+        )}
       </Paper>
     </>
   );
