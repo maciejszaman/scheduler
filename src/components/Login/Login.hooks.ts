@@ -48,7 +48,6 @@ export const useLoginHook = ({ setUserData }: Types.LoginProps) => {
         (userCredential) => {
           const user = userCredential.user;
           setUserData(user);
-          console.log(user);
         }
       );
     } catch (error: any) {
@@ -79,7 +78,6 @@ export const useLoginHook = ({ setUserData }: Types.LoginProps) => {
       await signInWithPopup(auth, provider).then((userCredential) => {
         const user = userCredential.user;
         setUserData(user);
-        console.log(user);
       });
     } catch (error: any) {
       toast.error(ParseErrorMessage(error.code));

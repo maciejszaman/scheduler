@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { eventMenuSchema } from "./EventMenu.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import ParseErrorMessage from "../../shared/ParseErrorMessage";
 
 const defaultValues = {
   title: "Wydarzenie",
@@ -86,8 +87,8 @@ export const useEventMenuHook = ({
       try {
         await setDoc(eventDocRef, eventData);
         toast.success("Dodano wydarzenie.");
-      } catch (err) {
-        console.log(err);
+      } catch (err: any) {
+        toast.error(ParseErrorMessage(err.code));
       }
     }
   };

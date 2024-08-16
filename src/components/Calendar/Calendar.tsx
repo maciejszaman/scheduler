@@ -23,7 +23,6 @@ export const Calendar = ({ viewMode, userData }: Types.CalendarProps) => {
   const [lastEventId, setLastEventId] = useState<string | undefined>(undefined);
 
   const openEditEventMenu = (eventId: string | undefined) => {
-    console.log(eventId);
     setLastEventId(eventId);
     setEditMenuOpen(true);
   };
