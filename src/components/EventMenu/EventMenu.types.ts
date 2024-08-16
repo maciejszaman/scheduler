@@ -4,4 +4,5 @@ export interface EventMenuProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   userData: User | null;
+  eventId: string | undefined;
 }

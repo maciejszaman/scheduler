@@ -15,7 +15,6 @@ function App() {
   const [language, setLanguage] = useState("pl-PL");
   const [darkMode, setDarkMode] = useState(false);
   const [viewMode, setViewMode] = useState(ViewModes.DailyView);
-  const [editMode, setEditMode] = useState(false);
   const [userData, setUserData] = useState<User | null>(null);
 
   const theme = createTheme({

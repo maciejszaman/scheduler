@@ -17,90 +17,28 @@ import {
 } from "firebase/auth";
 import * as Types from "./Login.types";
 import toast, { Toaster } from "react-hot-toast";
+import GoogleIcon from "@mui/icons-material/Google";
+import { useForm } from "react-hook-form";
+import { useLoginHook } from "./Login.hooks";
 
-export const Login = ({ setUserData }: Types.LoginProps) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [displayPasswordInput, setDisplayPasswordInput] = useState(false);
-
-  const { auth, app } = useContext(FirebaseContext);
-
-  const signup = async (email: string, password: string) => {
-    try {
-      await createUserWithEmailAndPassword(auth, email, password).then(
-        (userCredential) => {
-          const user = userCredential.user;
-          setUserData(user);
-        }
-      );
-    } catch (error: any) {
-      toast.error("huj");
-      console.log(error);
-    }
-  };
-
-  const handleSubmitButton = async () => {
-    const methods = await fetchSignInMethodsForEmail(auth, email);
-    console.log(methods.length);
-    if (methods.length === 0) {
-      try {
-        signup(email, password);
-      } catch (err) {
-        console.log(err);
-      }
-    } else {
-      try {
-        login(email, password);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  };
-
-  const login = async (email: string, password: string) => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password).then(
-        (userCredential) => {
-          const user = userCredential.user;
-          setUserData(user);
-          console.log(user);
-        }
-      );
-    } catch (error: any) {
-      toast.error("login huj");
-      console.log(error);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider).then((userCredential) => {
-        const user = userCredential.user;
-        setUserData(user);
-        console.log(user);
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    if (email.length > 3) {
-      setDisplayPasswordInput(true);
-    } else {
-      setDisplayPasswordInput(false);
-    }
-  }, [email]);
+export const Login = (props: Types.LoginProps) => {
+  const {
+    onSubmit,
+    handleGoogleSignIn,
+    setDisplayPasswordInput,
+    register,
+    errors,
+    displayPasswordInput,
+  } = useLoginHook(props);
 
   return (
     <>
       <Toaster />
       <Box padding={4}>
-        <Typography variant="h4">Scheduler</Typography>
+        <Typography variant="h4">Kalendarz</Typography>
         <Divider />
         <Box paddingTop={4} display="flex" justifyContent="center">
-          <form>
+          <form onSubmit={onSubmit}>
             <Box
               display="flex"
               flexDirection="column"
@@ -108,24 +46,30 @@ export const Login = ({ setUserData }: Types.LoginProps) => {
               maxWidth={250}
               justifyContent="space-evenly"
             >
-              <Typography variant="h6">Sign up</Typography>
+              <Typography variant="h6">Rejestracja</Typography>
               <TextField
-                onChange={(e) => setEmail(e.target.value)}
                 placeholder="E-mail"
                 type="email"
+                {...register("email")}
+                error={!!errors.email}
+                helperText={errors.email?.message}
               />
-              <Collapse in={displayPasswordInput}>
-                <TextField
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  type="password"
-                />
-              </Collapse>
-              <Button variant="contained" onClick={handleSubmitButton}>
+              <TextField
+                placeholder="Password"
+                type="password"
+                {...register("password")}
+                error={!!errors.password}
+                helperText={errors.password?.message}
+              />
+              <Button type="submit" variant="contained">
                 Sign up or log in
               </Button>
-              <Button variant="contained" onClick={handleGoogleSignIn}>
-                Sign in with google
+              <Button
+                startIcon={<GoogleIcon />}
+                variant="contained"
+                onClick={handleGoogleSignIn}
+              >
+                Zaloguj się z Google
               </Button>
             </Box>
           </form>

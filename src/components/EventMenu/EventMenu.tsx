@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Collapse,
   Container,
   Dialog,
   DialogActions,
@@ -8,18 +9,29 @@ import {
   DialogTitle,
   Divider,
   TextField,
+  Typography,
 } from "@mui/material";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import * as Types from "./EventMenu.types";
 import {
   DatePicker,
+  DateTimePicker,
   LocalizationProvider,
   TimePicker,
 } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { FirebaseContext } from "../../providers/FireBaseProvider";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocFromServer,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 
@@ -27,55 +39,111 @@ export const EventMenu = ({
   open,
   setOpen,
   userData,
+  eventId,
 }: Types.EventMenuProps) => {
   const { auth, app, db } = useContext(FirebaseContext);
 
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState("An event");
   const [startDate, setStartDate] = useState<Dayjs | null>(dayjs);
-  const [startTime, setStartTime] = useState<Dayjs | null>(dayjs);
-  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs);
-  const [endTime, setEndTime] = useState<Dayjs | null>(dayjs);
+  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs().add(1, "day"));
 
   const handleClose = () => {
     setOpen(false);
   };
 
-  const combineDateAndTimeToString = (
-    date: Dayjs | null,
-    time: Dayjs | null
-  ): string => {
-    if (date && time) {
-      // Combine the date and time into a single string
-      return `${date.format("YYYY-MM-DD")}T${time.format("HH:mm")}`;
-    }
-    return "";
-  };
-
   const uploadEvent = async () => {
     if (userData) {
+      const uniqueId = uuidv4();
+
       const eventDocRef = doc(
         doc(db, "users", userData.uid),
         "events",
-        uuidv4()
+        uniqueId
       );
 
       const eventData = {
+        id: uniqueId,
         title: title,
-        startDate: combineDateAndTimeToString(startDate, startTime),
-        endDate: combineDateAndTimeToString(endDate, endTime),
+        startDate: startDate?.format("YYYY-MM-DDTHH:mm"),
+        endDate: endDate?.format("YYYY-MM-DDTHH:mm"),
       };
       try {
         await setDoc(eventDocRef, eventData);
-        toast.success("Event added successfully.");
       } catch (err) {
         console.log(err);
       }
     }
   };
 
-  const handleSubmit = () => {
-    uploadEvent();
+  const getOldEventData = async (eventId: string) => {
+    if (userData) {
+      const eventRef = doc(db, "users", userData.uid, "events", eventId);
+      const oldEventDoc = await getDocFromServer(eventRef);
+      if (oldEventDoc.exists()) {
+        const eventData = oldEventDoc.data();
+        setTitle(eventData.title);
+        setStartDate(dayjs(eventData.startDate));
+        setEndDate(dayjs(eventData.endDate));
+      }
+    }
   };
+
+  const updateEvent = async () => {
+    if (userData && eventId) {
+      try {
+        await updateDoc(doc(db, "users", userData.uid, "events", eventId), {
+          title: title,
+          startDate: startDate?.format("YYYY-MM-DDTHH:mm"),
+          endDate: endDate?.format("YYYY-MM-DDTHH:mm"),
+        });
+        toast.success("Event updated.");
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    if (userData && eventId) {
+      try {
+        await deleteDoc(doc(db, "users", userData.uid, "events", eventId));
+        toast.success("Event removed.");
+        setOpen(false);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  const handleSubmit = () => {
+    if (eventId) {
+      if (endDate?.isBefore(startDate)) {
+        toast.error("The dates are wrong!");
+      } else if (!title) {
+        toast.error("The title cannot be empty!");
+      } else {
+        updateEvent();
+        setOpen(false);
+        toast.success("Edited the event.");
+      }
+    } else {
+      if (endDate?.isBefore(startDate)) {
+        toast.error("The dates are wrong!");
+      } else if (!title) {
+        toast.error("The title cannot be empty!");
+      } else {
+        uploadEvent();
+        setOpen(false);
+        toast.success("Added the event.");
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (eventId) {
+      getOldEventData(eventId);
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onClose={handleClose}>
@@ -93,31 +161,17 @@ export const EventMenu = ({
           />
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Box display="flex" gap={1}>
-              <DatePicker
+              <DateTimePicker
                 label="start date"
                 value={startDate}
                 onChange={(newValue) => setStartDate(newValue)}
-                sx={{ width: 150 }}
-              />
-              <TimePicker
-                onChange={(newValue) => setStartTime(newValue)}
-                value={startTime}
-                label="start hour"
-                sx={{ width: 150 }}
               />
             </Box>
             <Box display="flex" gap={1}>
-              <DatePicker
+              <DateTimePicker
                 label="End date"
                 value={endDate}
-                onChange={(newValue) => setStartDate(newValue)}
-                sx={{ width: 150 }}
-              />
-              <TimePicker
-                onChange={(newValue) => setEndTime(newValue)}
-                value={endTime}
-                label="End hour"
-                sx={{ width: 150 }}
+                onChange={(newValue) => setEndDate(newValue)}
               />
             </Box>
           </LocalizationProvider>
@@ -128,8 +182,14 @@ export const EventMenu = ({
         <Button variant="outlined" onClick={handleClose}>
           Cancel
         </Button>
+
+        {eventId ? (
+          <Button variant="outlined" color="error" onClick={handleDelete}>
+            Delete
+          </Button>
+        ) : null}
         <Button variant="contained" onClick={handleSubmit}>
-          Add
+          {eventId ? "Edit" : "Add"}
         </Button>
       </DialogActions>
     </Dialog>
