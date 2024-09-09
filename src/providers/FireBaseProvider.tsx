@@ -4,18 +4,22 @@ import { getAuth } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { createContext, ReactElement } from "react";
+import { config } from "dotenv";
+
+config();
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
+
 const firebaseConfig = {
-  apiKey: "AIzaSyD7X2rI2o2YjdJW38Z6KPw3LK8UhIrNipE",
-  authDomain: "scheduler-c6ccf.firebaseapp.com",
-  projectId: "scheduler-c6ccf",
-  storageBucket: "scheduler-c6ccf.appspot.com",
-  messagingSenderId: "327444786439",
-  appId: "1:327444786439:web:242667a467f7f9acfde9a2",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
